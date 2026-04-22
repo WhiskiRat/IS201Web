@@ -1,0 +1,149 @@
+:root {
+    --byu-navy: #002e5d;
+    --byu-royal: #0062b8;
+    --byu-white: #ffffff;
+    --smoke: #f0f2f5;
+}
+
+body {
+    background-color: var(--smoke);
+    color: var(--byu-navy);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+}
+
+/* Nav Bar */
+.text-style {
+    background: var(--byu-navy);
+    padding: 15px;
+    text-align: center;
+    border-bottom: 4px solid var(--byu-royal);
+}
+.look a {
+    color: var(--byu-white);
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.look a:hover { color: var(--byu-royal); }
+
+.game-container {
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#ui-header {
+    background: var(--byu-white);
+    padding: 25px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 800px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin-bottom: 40px;
+}
+
+/* Row Styling for Input and Action Buttons */
+#input-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap; /* Keeps it clean on mobile */
+}
+
+input {
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid var(--byu-navy);
+    width: 250px;
+    font-size: 1rem;
+}
+
+button { 
+    padding: 12px 20px; 
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-weight: bold; 
+    transition: 0.2s ease; 
+}
+button:hover { transform: scale(1.05); filter: brightness(1.1); }
+
+.btn-primary { background: var(--byu-navy); color: white; }
+.btn-secondary { background: var(--byu-royal); color: white; }
+
+/* Progress Bars */
+.progress-wrapper {
+    width: 100%;
+    height: 30px;
+    background: #e0e0e0;
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 10px 0;
+    border: 2px solid var(--byu-navy);
+}
+.bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--byu-navy), var(--byu-royal));
+    transition: width 0.5s ease;
+}
+
+/* Grid Layout for Continents */
+.continents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 25px;
+    width: 100%;
+    max-width: 1200px;
+    justify-content: center;
+}
+
+.continent-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    border-top: 6px solid var(--byu-navy);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.mini-bar-bg { width: 100%; height: 10px; background: #eee; border-radius: 5px; margin: 10px 0; overflow: hidden; }
+.mini-bar { height: 100%; width: 0%; background: var(--byu-royal); transition: width 0.5s ease; }
+
+.country-list { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.country-tag { 
+    background: var(--smoke); 
+    padding: 6px 12px; 
+    border-radius: 4px; 
+    font-size: 0.9rem; 
+    border: 1px solid #ddd; 
+    color: var(--byu-navy); 
+    font-weight: bold;
+}
+
+/* Animations */
+.country-pop { animation: popEffect 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes popEffect {
+    0% { transform: scale(0); }
+    70% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Static Footer at bottom of content */
+#admin-footer {
+    margin: 50px 0 30px 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+}
+
+.btn-save { background: var(--byu-navy); color: white; }
+.btn-reset { background: var(--byu-royal); color: white; }
+
+#cosmo-msg { display: block; margin-top: 15px; font-weight: bold; color: var(--byu-royal); }

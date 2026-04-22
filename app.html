@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmo's Global Conquest</title>
+    <link rel="stylesheet" type="text/css" href="/css/ai.css">
+</head>
+<body onload="loadProgress()">
+    <div class="text-style">
+        <nav class="look">
+            <a href="index.html">Resume</a>
+            <a href="scratch.html">Scratch</a>
+            <a href="#">Game</a>
+        </nav>
+    </div>
+
+    <div class="game-container">
+        <div id="ui-header">
+            <h1 class="conquest-title">Cosmo's World Domination</h1>
+            
+            <div class="world-progress">
+                <p>TOTAL WORLD DOMINATION: <span id="world-percent">0</span>%</p>
+                <div class="progress-wrapper">
+                    <div id="world-bar" class="bar"></div>
+                </div>
+            </div>
+            
+            <div id="input-row">
+                <input type="text" id="country-input" placeholder="Name a country..." autocomplete="off">
+                <button onclick="conquer()" class="btn-primary">Conquer</button>
+                <button onclick="askCosmo()" class="btn-secondary">Ask Cosmo</button>
+            </div>
+
+            <div id="cosmo-box">
+                <span id="cosmo-msg">Help Cosmo conquer the world!</span>
+            </div>
+        </div>
+
+        <div class="continents-grid">
+            <div class="continent-card" id="africa-card">
+                <h3>Africa (<span id="africa-count">0</span>/54)</h3>
+                <div class="mini-bar-bg"><div id="africa-bar" class="mini-bar"></div></div>
+                <div class="country-list" id="list-africa"></div>
+            </div>
+            <div class="continent-card" id="asia-card">
+                <h3>Asia (<span id="asia-count">0</span>/48)</h3>
+                <div class="mini-bar-bg"><div id="asia-bar" class="mini-bar"></div></div>
+                <div class="country-list" id="list-asia"></div>
+            </div>
+            <div class="continent-card" id="europe-card">
+                <h3>Europe (<span id="europe-count">0</span>/44)</h3>
+                <div class="mini-bar-bg"><div id="europe-bar" class="mini-bar"></div></div>
+                <div class="country-list" id="list-europe"></div>
+            </div>
+            <div class="continent-card" id="north-america-card">
+                <h3>North America (<span id="na-count">0</span>/23)</h3>
+                <div class="mini-bar-bg"><div id="na-bar" class="mini-bar"></div></div>
+                <div class="country-list" id="list-north-america"></div>
+            </div>
+            <div class="continent-card" id="south-america-card">
+                <h3>South America (<span id="sa-count">0</span>/12)</h3>
+                <div class="mini-bar-bg"><div id="sa-bar" class="mini-bar"></div></div>
+                <div class="country-list" id="list-south-america"></div>
+            </div>
+            <div class="continent-card" id="oceania-card">
+                <h3>Oceania (<span id="oceania-count">0</span>/14)</h3>
+                <div class="mini-bar-bg"><div id="oceania-bar" class="mini-bar"></div></div>
+                <div class="country-list" id="list-oceania"></div>
+            </div>
+        </div>
+
+        <footer id="admin-footer">
+            <button onclick="saveProgress()" class="btn-save">Save Empire</button>
+            <button onclick="resetProgress()" class="btn-reset">Reset Progress</button>
+        </footer>
+    </div>
+
+    <script>
+        const worldData = {
+            "africa": ["algeria", "angola", "benin", "botswana", "burkina faso", "burundi", "cabo verde", "cameroon", "central african republic", "chad", "comoros", "congo", "djibouti", "egypt", "equatorial guinea", "eritrea", "eswatini", "ethiopia", "gabon", "gambia", "ghana", "guinea", "guinea bissau", "ivory coast", "kenya", "lesotho", "liberia", "libya", "madagascar", "malawi", "mali", "mauritania", "mauritius", "morocco", "mozambique", "namibia", "niger", "nigeria", "rwanda", "sao tome and principe", "senegal", "seychelles", "sierra leone", "somalia", "south africa", "south sudan", "sudan", "tanzania", "togo", "tunisia", "uganda", "zambia", "zimbabwe"],
+            "asia": ["afghanistan", "armenia", "azerbaijan", "bahrain", "bangladesh", "bhutan", "brunei", "cambodia", "china", "cyprus", "georgia", "india", "indonesia", "iran", "iraq", "israel", "japan", "jordan", "kazakhstan", "kuwait", "kyrgyzstan", "laos", "lebanon", "malaysia", "maldives", "mongolia", "myanmar", "nepal", "north korea", "oman", "pakistan", "palestine", "philippines", "qatar", "saudi arabia", "singapore", "south korea", "sri lanka", "syria", "taiwan", "tajikistan", "thailand", "timor leste", "turkey", "turkmenistan", "united arab emirates", "uzbekistan", "vietnam", "yemen"],
+            "europe": ["albania", "andorra", "austria", "belarus", "belgium", "bosnia and herzegovina", "bulgaria", "croatia", "czech republic", "denmark", "estonia", "finland", "france", "germany", "greece", "hungary", "iceland", "ireland", "italy", "kosovo", "latvia", "liechtenstein", "lithuania", "luxembourg", "malta", "moldova", "monaco", "montenegro", "netherlands", "north macedonia", "norway", "poland", "portugal", "romania", "russia", "san marino", "serbia", "slovakia", "slovenia", "spain", "sweden", "switzerland", "ukraine", "united kingdom", "vatican city"],
+            "north-america": ["antigua and barbuda", "bahamas", "barbados", "belize", "canada", "costa rica", "cuba", "dominica", "dominican republic", "el salvador", "grenada", "guatemala", "haiti", "honduras", "jamaica", "mexico", "nicaragua", "panama", "saint kitts and nevis", "saint lucia", "saint vincent and the grenadines", "trinidad and tobago", "united states of america"],
+            "south-america": ["argentina", "bolivia", "brazil", "chile", "colombia", "ecuador", "guyana", "paraguay", "peru", "suriname", "uruguay", "venezuela"],
+            "oceania": ["australia", "fiji", "kiribati", "marshall islands", "micronesia", "nauru", "new zealand", "palau", "papua new guinea", "samoa", "solomon islands", "tonga", "tuvalu", "vanuatu"]
+        };
+
+        let conquered = new Set();
+        let hintCountry = "";
+        let hintIndex = 0;
+
+        function conquer() {
+            const input = document.getElementById('country-input');
+            const msg = document.getElementById('cosmo-msg');
+            let name = input.value.trim().toLowerCase();
+
+            let foundContinent = null;
+            for (let continent in worldData) {
+                if (worldData[continent].includes(name)) {
+                    foundContinent = continent;
+                    break;
+                }
+            }
+
+            if (foundContinent) {
+                if (conquered.has(name)) {
+                    msg.innerText = "Cosmo already conquered this one!";
+                } else {
+                    conquered.add(name);
+                    addToContinent(name, foundContinent);
+                    
+                    // --- THE FIX ---
+                    // This immediately updates the text so the hint disappears
+                    msg.innerText = `Cosmo has conquered ${name.toUpperCase()}!`;
+                    
+                    updateStats(foundContinent);
+                    
+                    // Reset hint variables so Cosmo picks a new country next time
+                    hintCountry = ""; 
+                    hintIndex = 0;
+                }
+            } else {
+                msg.innerText = "Either you suck at spelling, or that’s not a country.";
+            }
+            input.value = "";
+        }
+
+        function updateStats(lastContinent) {
+            const msg = document.getElementById('cosmo-msg');
+            const totalWorldCount = 196;
+            const currentTotal = conquered.size;
+            
+            const worldPercent = Math.floor((currentTotal / totalWorldCount) * 100);
+            document.getElementById('world-bar').style.width = worldPercent + "%";
+            document.getElementById('world-percent').innerText = worldPercent;
+
+            const continents = ['africa', 'asia', 'europe', 'north-america', 'south-america', 'oceania'];
+            const idMap = {'north-america': 'na', 'south-america': 'sa'};
+            
+            let completedThisContinent = false;
+
+            continents.forEach(c => {
+                const count = Array.from(conquered).filter(country => worldData[c].includes(country)).length;
+                const totalC = c === 'north-america' ? 23 : c === 'south-america' ? 12 : worldData[c].length;
+                const percent = Math.floor((count / totalC) * 100);
+                const shortId = idMap[c] || c;
+                
+                document.getElementById(`${shortId}-bar`).style.width = percent + "%";
+                document.getElementById(`${shortId}-count`).innerText = count;
+
+                if (c === lastContinent && count === totalC) {
+                    completedThisContinent = true;
+                }
+            });
+
+            // If the world is done, show the ultimate victory message
+            if (currentTotal >= totalWorldCount) {
+                msg.innerText = "You successfully helped Cosmo conquer the whole world!";
+            } else if (completedThisContinent) {
+                // If a continent is done, show that victory message instead
+                const formattedName = lastContinent.replace('-', ' ').toUpperCase();
+                msg.innerText = `Cosmo has conquered ${formattedName}!`;
+            }
+        }
+
+        function saveProgress() {
+            localStorage.setItem('cosmoEmpire', JSON.stringify(Array.from(conquered)));
+            document.getElementById('cosmo-msg').innerText = "Progress saved! Cosmo is keeping it safe.";
+        }
+
+        function loadProgress() {
+            const savedData = localStorage.getItem('cosmoEmpire');
+            if (savedData) {
+                const conqueredArray = JSON.parse(savedData);
+                conqueredArray.forEach(name => {
+                    conquered.add(name);
+                    for (let continent in worldData) {
+                        if (worldData[continent].includes(name)) {
+                            addToContinent(name, continent, true);
+                            break;
+                        }
+                    }
+                });
+                updateStats();
+            }
+        }
+
+        function resetProgress() {
+            if (confirm("Surrender your progress? Cosmo will not be happy!")) {
+                localStorage.removeItem('cosmoEmpire');
+                location.reload();
+            }
+        }
+
+        function askCosmo() {
+            const msg = document.getElementById('cosmo-msg');
+            if (!hintCountry) {
+                const flatList = [];
+                for(let k in worldData) flatList.push(...worldData[k]);
+                const pool = flatList.filter(c => !conquered.has(c));
+                if (pool.length === 0) return;
+                hintCountry = pool[Math.floor(Math.random() * pool.length)];
+                hintIndex = 2; 
+            } else {
+                hintIndex += 1; 
+            }
+            let revealed = hintCountry.substring(0, hintIndex).toUpperCase();
+            let hidden = "_ ".repeat(Math.max(0, hintCountry.length - hintIndex));
+            msg.innerText = `Target identified: ${revealed} ${hidden}`;
+            if (hintIndex >= hintCountry.length) hintCountry = ""; 
+        }
+
+        function addToContinent(name, continent, skipAnim = false) {
+            const list = document.getElementById(`list-${continent}`);
+            const span = document.createElement('span');
+            span.className = skipAnim ? 'country-tag' : 'country-tag country-pop';
+            span.innerText = name;
+            list.appendChild(span);
+        }
+
+        document.getElementById("country-input").addEventListener("keyup", (e) => {
+            if (e.key === "Enter") conquer();
+        });
+    </script>
+</body>
+</html>
